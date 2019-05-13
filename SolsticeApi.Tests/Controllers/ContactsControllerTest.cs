@@ -30,7 +30,7 @@ namespace SolsticeApi.Tests.Controllers
 
 
             // Act
-            var result = _controller.Get(contactId);
+            var result = _controller.GetById(contactId);
 
             // Assert
             Assert.IsNotNull(result);
@@ -47,7 +47,7 @@ namespace SolsticeApi.Tests.Controllers
 
 
             // Act
-            var result = _controller.Get(contactId);
+            var result = _controller.GetById(contactId);
 
             // Assert
             Assert.IsNotNull(result);

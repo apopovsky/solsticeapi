@@ -12,8 +12,7 @@
         void AddContact(Contact value);
         void UpdateContact(Guid id, Contact contact);
         void DeleteContact(Contact contact);
-        Contact GetByMail(string email);
-        IList<Contact> GetByPhone(string phoneNumber);
+        IList<Contact> Find(string phoneNumber, string email);
     }
 
     public class ContactRepository : IContacRepository
@@ -50,10 +49,9 @@
                 existing.Birthdate = contact.Birthdate;
                 existing.Company = contact.Company;
                 existing.Email = contact.Email;
-                existing.Image = contact.Image;
+                existing.ProfileImage = contact.ProfileImage;
                 existing.PersonalPhoneNumber = contact.PersonalPhoneNumber;
                 existing.WorkPhoneNumber = contact.WorkPhoneNumber;
-                existing.Profile = contact.Profile;
 
                 if (contact.Address != null)
                 {
@@ -69,16 +67,23 @@
             _dataContext.Contacts.Remove(contact);
             _dataContext.SaveChanges();
         }
-
-        public Contact GetByMail(string email)
+        
+        public IList<Contact> Find(string phoneNumber, string email)
         {
-           return _dataContext.Contacts.Include(c=>c.Address).FirstOrDefault(x => x.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
-        }
+            var query = _dataContext.Contacts.Include(c => c.Address);
+            if (!string.IsNullOrWhiteSpace(phoneNumber))
+            {
+                query = query.Where(x =>
+                    x.PersonalPhoneNumber.Equals(phoneNumber, StringComparison.OrdinalIgnoreCase) ||
+                    x.WorkPhoneNumber.Equals(phoneNumber, StringComparison.OrdinalIgnoreCase));
+            }
 
-        public IList<Contact> GetByPhone(string phoneNumber)
-        {
-            return _dataContext.Contacts.Include(c => c.Address).
-                Where(x => x.PersonalPhoneNumber.Equals(phoneNumber, StringComparison.OrdinalIgnoreCase) || x.WorkPhoneNumber.Equals(phoneNumber, StringComparison.OrdinalIgnoreCase) ).ToList();
+            if (!string.IsNullOrWhiteSpace(email))
+            {
+                query = query.Where(x => x.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+            }
+
+            return query.ToList();
         }
     }
 }
